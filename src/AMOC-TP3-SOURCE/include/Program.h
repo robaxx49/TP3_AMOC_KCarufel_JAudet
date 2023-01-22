@@ -10,6 +10,6 @@ public:
     void loop();
 
 private:
-    WiFiManager *wifiManager;
-    WebServer *webServer;
+    WiFiManager *m_wifiManager;
+    WebServer *m_webServer;
 };

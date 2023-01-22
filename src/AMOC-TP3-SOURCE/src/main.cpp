@@ -1,11 +1,16 @@
 #include <Arduino.h>
 
-void setup() {
-    Serial.begin(115200);
-    
-  // put your setup code here, to run once:
+#include "Program.h"
+
+Program *program;
+
+void setup()
+{
+  Serial.begin(115200);
+  program = new Program();
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
+void loop()
+{
+  program->loop();
 }
