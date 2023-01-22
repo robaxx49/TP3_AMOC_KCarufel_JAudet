@@ -11,16 +11,22 @@ WebServer *serveurWeb;
 
 Program::Program()
 {
-   this->m_wifiManager = new WiFiManager();
-   this->m_webServer = new WebServer();
-   this->m_bme280 = new BME280();
+    this->m_wifiManager = new WiFiManager();
+    this->m_webServer = new WebServer();
+    this->m_bme280 = new BME280();
+    this->connexionReseau();
 }
 
 void Program::loop()
 {
-   //bme280->tick();
-   //Serial.println(bme280->m_temperature);
-   Serial.println("test");
+    // bme280->tick();
+    // Serial.println(bme280->m_temperature);
+    Serial.println("test");
+
+    if (WiFi.isConnected())
+    {
+        this->m_webServer->handleClient();
+    }
 }
 
 void Program::connexionReseau()
