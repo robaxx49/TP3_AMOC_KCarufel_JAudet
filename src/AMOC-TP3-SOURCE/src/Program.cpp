@@ -1,4 +1,6 @@
 #include <WiFiManager.h>
+#include <uri/UriRegex.h>
+
 #include "BME280.h"
 #include "Program.h"
 #include "Arduino.h"
@@ -9,9 +11,9 @@ WebServer *serveurWeb;
 
 Program::Program()
 {
-   //this->wifiManager = new WiFiManager();
-   //this->webServer = new WebServer();
-   this->bme280 = new BME280();
+   this->m_wifiManager = new WiFiManager();
+   this->m_webServer = new WebServer();
+   this->m_bme280 = new BME280();
 }
 
 void Program::loop()
@@ -57,7 +59,7 @@ void Program::connexionReseau()
     this->m_wifiManager->setParamsPage(true);
 
     // Pour le débug, on peut forcer l'effacement de la configuration du WiFi
-    // wm.erase();
+    this->m_wifiManager->erase();
 
     // Essaie de se connecter au réseau WiFi. Si échec, il lance le portail de
     // configuration. L'appel est bloquant -> rend la main après le timeout

@@ -8,9 +8,10 @@ class Program
 public:
     Program();
     void loop();
+
 private:
-    WiFiManager *wifiManager;
-    WebServer *webServer;
-    BME280 *bme280;
+    WiFiManager *m_wifiManager;
+    WebServer *m_webServer;
+    BME280 *m_bme280;
     void connexionReseau();
 };
