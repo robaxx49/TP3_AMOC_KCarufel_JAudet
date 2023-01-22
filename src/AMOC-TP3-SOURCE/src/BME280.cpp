@@ -7,7 +7,6 @@
 
 BME280::BME280()
 {
-    Adafruit_BME280 bme;
     m_temperature = bme.readTemperature();
     m_altitude = bme.readAltitude(SEALEVELPRESSURE_HPA);
     m_pression = bme.readPressure();

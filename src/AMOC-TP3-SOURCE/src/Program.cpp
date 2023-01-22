@@ -1,6 +1,5 @@
 #include <WiFiManager.h>
-#include <uri/UriRegex.h>
-
+#include "BME280.h"
 #include "Program.h"
 #include "Arduino.h"
 
@@ -10,18 +9,16 @@ WebServer *serveurWeb;
 
 Program::Program()
 {
-    this->m_wifiManager = new WiFiManager();
-    this->m_webServer = new WebServer();
-    serveurWeb = new WebServer();
-    this->connexionReseau();
+   //this->wifiManager = new WiFiManager();
+   //this->webServer = new WebServer();
+   this->bme280 = new BME280();
 }
 
 void Program::loop()
 {
-    if (WiFi.isConnected())
-    {
-        this->m_webServer->handleClient();
-    }
+   //bme280->tick();
+   //Serial.println(bme280->m_temperature);
+   Serial.println("test");
 }
 
 void Program::connexionReseau()
