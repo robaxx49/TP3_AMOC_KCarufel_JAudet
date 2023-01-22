@@ -1,9 +1,9 @@
 #include "Program.h"
 #include "WiFiManager.h"
 
-Program::Program(WiFiManager *wifiManager)
+Program::Program()
 {
-   this->wifiManager = wifiManager;
+   this->wifiManager = new WiFiManager();
 }
 
 void Program::setup()

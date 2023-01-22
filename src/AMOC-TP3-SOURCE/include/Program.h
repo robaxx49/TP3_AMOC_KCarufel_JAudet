@@ -4,7 +4,7 @@ class WiFiManager;
 class Program
 {
 public:
-    Program(WiFiManager* wifiManager);
+    Program();
   
 private:
     WiFiManager* wifiManager;       
