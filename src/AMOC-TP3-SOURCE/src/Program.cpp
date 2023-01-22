@@ -1,14 +1,15 @@
+#include <WiFiManager.h>
+
 #include "Program.h"
-#include "WiFiManager.h"
+#include "Arduino.h"
+
+#include "configReseau.h"
 
 Program::Program()
 {
    this->wifiManager = new WiFiManager();
-}
+   this->webServer = new WebServer();
 
-void Program::setup()
-{
-   
 }
 
 void Program::loop()
@@ -16,3 +17,7 @@ void Program::loop()
    
 }
 
+void Program::connexionReseau()
+{
+
+}

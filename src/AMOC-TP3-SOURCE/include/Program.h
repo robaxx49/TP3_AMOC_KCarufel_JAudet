@@ -1,13 +1,15 @@
 #pragma once
 
 class WiFiManager;
+class WebServer;
 class Program
 {
 public:
     Program();
   
 private:
-    WiFiManager* wifiManager;       
-    void setup();
+    WiFiManager* wifiManager;    
+    WebServer* webServer;   
+    void connexionReseau();
     void loop();
 };
