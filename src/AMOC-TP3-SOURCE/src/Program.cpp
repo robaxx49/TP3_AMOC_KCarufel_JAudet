@@ -67,7 +67,7 @@ void Program::connexionReseau()
     this->m_wifiManager->setParamsPage(true);
 
     // Pour le débug, on peut forcer l'effacement de la configuration du WiFi
-    // wm.erase();
+    this->m_wifiManager->erase();
 
     // Essaie de se connecter au réseau WiFi. Si échec, il lance le portail de
     // configuration. L'appel est bloquant -> rend la main après le timeout
@@ -75,7 +75,8 @@ void Program::connexionReseau()
     this->m_wifiManager->autoConnect(SSIDPortail, motPasseAPPortail);
 
     // Pour lancer le portail manuellement
-    // wm.startConfigPortal();
+    this->m_wifiManager->startConfigPortal();
+
     this->m_webServer->on(UriRegex("/.*"), []()
                           { serveurWeb->send(200, "text/plain", "Bienvenue sur mon site web !"); });
 
