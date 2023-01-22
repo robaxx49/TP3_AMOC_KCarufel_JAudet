@@ -6,10 +6,10 @@ class Program
 {
 public:
     Program();
-  
-private:
-    WiFiManager* wifiManager;    
-    WebServer* webServer;   
     void connexionReseau();
     void loop();
+
+private:
+    WiFiManager *wifiManager;
+    WebServer *webServer;
 };
