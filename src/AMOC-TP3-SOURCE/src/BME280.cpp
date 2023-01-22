@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "BME280.h"
+#include <Wire.h>
 #include <Adafruit_BMP280.h>
 #include <Adafruit_BME280.h>
 #include <Adafruit_Sensor.h>
@@ -7,17 +8,23 @@
 
 BME280::BME280()
 {
-    m_temperature = bme.readTemperature();
-    m_altitude = bme.readAltitude(SEALEVELPRESSURE_HPA);
-    m_pression = bme.readPressure();
+    m_temperature = 0.0f;
+    m_altitude = 0.0f;
+    m_pression = 0.0f;
+    m_message ="";
 }
 
 void BME280::tick()
 {
-    Adafruit_BME280 bme;
-    m_temperature = bme.readTemperature();
-    m_altitude = bme.readAltitude(SEALEVELPRESSURE_HPA);
-    m_pression = bme.readPressure();
+     bool status;
+    status = m_bme.begin(0x76);  
+    if (!status) {
+    Serial.println("Impossible de trouver le BME280 sur votre port, contactez le support!");
+    while (1);
+    }
+    m_temperature =m_bme.readTemperature();
+    m_altitude = m_bme.readAltitude(SEALEVELPRESSURE_HPA);
+    m_pression = m_bme.readPressure();
     if (m_temperature > 0)
     {
         m_message = "Plus haut que le point de congelation";
