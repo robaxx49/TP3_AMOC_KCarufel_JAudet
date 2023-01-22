@@ -13,7 +13,7 @@ public:
     float m_pression;
     float m_altitude;
     String m_message;
-    Adafruit_BME280 bme;
+    Adafruit_BME280 m_bme;
     BME280();
     void tick();
 };

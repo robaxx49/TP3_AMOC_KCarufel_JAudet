@@ -14,8 +14,8 @@ Program::Program()
 
 void Program::loop()
 {
-   //bme280->tick();
-   //Serial.println(bme280->m_temperature);
+   bme280->tick();
+   Serial.println(bme280->m_temperature);
    Serial.println("test");
 }
 
