@@ -1,9 +1,8 @@
 #pragma once
-
+#include <Adafruit_BME280.h>
+#include <Adafruit_Sensor.h>
 #include <Arduino.h>
 
-class Adafruit_BME280;
-class Adafruit_Sensor;
 class BME280
 {
 private:
