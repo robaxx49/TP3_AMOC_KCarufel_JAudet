@@ -1,7 +1,7 @@
 #include <WiFiManager.h>
 #include <uri/UriRegex.h>
 
-#include "BME280.h"
+// #include "BME280.h"
 #include "Program.h"
 #include "Arduino.h"
 
@@ -13,15 +13,17 @@ Program::Program()
 {
     this->m_wifiManager = new WiFiManager();
     this->m_webServer = new WebServer();
-    this->m_bme280 = new BME280();
+    serveurWeb = new WebServer();
     this->connexionReseau();
+
+    // this->m_bme280 = new BME280();
 }
 
 void Program::loop()
 {
-    // bme280->tick();
+    // this->m_bme280->tick();
     // Serial.println(bme280->m_temperature);
-    Serial.println("test");
+    // Serial.println("test");
 
     if (WiFi.isConnected())
     {
@@ -65,7 +67,7 @@ void Program::connexionReseau()
     this->m_wifiManager->setParamsPage(true);
 
     // Pour le débug, on peut forcer l'effacement de la configuration du WiFi
-    this->m_wifiManager->erase();
+    // wm.erase();
 
     // Essaie de se connecter au réseau WiFi. Si échec, il lance le portail de
     // configuration. L'appel est bloquant -> rend la main après le timeout
