@@ -21,6 +21,62 @@ PubSubClient client(espClient);
 long currentTime = 0;
 long lastTime = 0;
 
+
+Program::Program()
+{
+    Serial.begin(115200);
+
+    this->m_wifiManager = new WiFiManager();
+    // this->m_webServer = new WebServer();
+    // serveurWeb = new WebServer();
+    this->connexionReseau();
+    client.setCallback(callback);
+
+    // this->m_bme280 = new BME280();
+    client.setServer(mqtt_server, brokerPort);
+}
+
+void Program::loop()
+{
+    //  this->m_bme280->tick();
+    //  Serial.println(bme280->m_temperature);
+    //  Serial.println("test");
+
+    if (WiFi.isConnected())
+    {
+        // this->m_webServer->handleClient();
+    }
+
+    currentTime = millis();
+
+    if (!client.connected())
+    {
+        reconnect();
+    }
+
+    if (currentTime - lastTime > 5000 && client.connected())
+    {
+        Serial1.println("test");
+        lastTime = currentTime;
+        bool x = client.publish(brokerTopic, "Hello from ESP32");
+        if (x)
+        {
+            Serial.println("Message sent");
+        }
+        else
+        {
+            Serial.println("Message not sent");
+        }
+    }
+    else
+    {
+        Serial.println("not connected");
+    }
+
+    client.loop();
+}
+
+
 void Program::connexionReseau()
 {
     Serial1.println("Connexion au réseau WiFi en cours...");
@@ -116,56 +172,3 @@ void reconnect()
     }
 }
 
-Program::Program()
-{
-    Serial.begin(115200);
-
-    this->m_wifiManager = new WiFiManager();
-    // this->m_webServer = new WebServer();
-    // serveurWeb = new WebServer();
-    this->connexionReseau();
-    client.setCallback(callback);
-
-    // this->m_bme280 = new BME280();
-    client.setServer(mqtt_server, brokerPort);
-}
-
-void Program::loop()
-{
-    //  this->m_bme280->tick();
-    //  Serial.println(bme280->m_temperature);
-    //  Serial.println("test");
-
-    if (WiFi.isConnected())
-    {
-        // this->m_webServer->handleClient();
-    }
-
-    currentTime = millis();
-
-    if (!client.connected())
-    {
-        reconnect();
-    }
-
-    if (currentTime - lastTime > 5000 && client.connected())
-    {
-        Serial1.println("test");
-        lastTime = currentTime;
-        bool x = client.publish(brokerTopic, "Hello from ESP32");
-        if (x)
-        {
-            Serial.println("Message sent");
-        }
-        else
-        {
-            Serial.println("Message not sent");
-        }
-    }
-    else
-    {
-        Serial.println("not connected");
-    }
-
-    client.loop();
-}
