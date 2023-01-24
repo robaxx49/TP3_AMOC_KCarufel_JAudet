@@ -11,6 +11,7 @@ BME280::BME280()
     m_temperature = 0.0f;
     m_altitude = 0.0f;
     m_pression = 0.0f;
+    m_humidite = 0.0f;
     m_message1 = "";
     m_message2 = "";
 }
@@ -28,6 +29,7 @@ void BME280::tick()
     m_temperature = m_bme.readTemperature();
     m_altitude = m_bme.readAltitude(SEALEVELPRESSURE_HPA);
     m_pression = m_bme.readPressure();
+    m_humidite = m_bme.readHumidity();
     if (m_temperature > 5)
     {
         m_message1 = "Trop Chaud!";
