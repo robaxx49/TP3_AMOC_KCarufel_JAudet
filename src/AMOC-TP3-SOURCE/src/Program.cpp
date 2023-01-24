@@ -12,59 +12,18 @@ const char *brokerUser = "admin";
 const char *brokerPassword = "admin";
 const char *mqtt_server = "10.0.0.156";
 // const char* brokerPort = 1883;
-uint16_t brokerPort = 8123;
+uint16_t brokerPort = 1883;
 const char *brokerTopic = "test/broker";
 
-WebServer *serveurWeb;
+// WebServer *serveurWeb;
 WiFiClient espClient;
 PubSubClient client(espClient);
 long currentTime = 0;
 long lastTime = 0;
 
-Program::Program()
-{
-    this->m_wifiManager = new WiFiManager();
-    this->m_webServer = new WebServer();
-    serveurWeb = new WebServer();
-    this->connexionReseau();
-    Serial.begin(115200);
-
-    // this->m_bme280 = new BME280();
-    client.setServer(mqtt_server, brokerPort);
-}
-
-void Program::loop()
-{
-    //  this->m_bme280->tick();
-    //  Serial.println(bme280->m_temperature);
-    //  Serial.println("test");
-
-    if (WiFi.isConnected())
-    {
-        // this->m_webServer->handleClient();
-    }
-
-    client.loop();
-
-    currentTime = millis();
-    if (currentTime - lastTime > 5000 && client.connect(mqtt_server, brokerUser, brokerPassword))
-    {
-        Serial1.println("test");
-        lastTime = currentTime;
-        bool x = client.publish(brokerTopic, "Hello from ESP32");
-        if (x)
-        {
-            Serial.println("Message sent");
-        }
-        else
-        {
-            Serial.println("Message not sent");
-        }
-    }
-}
-
 void Program::connexionReseau()
 {
+    Serial1.println("Connexion au réseau WiFi en cours...");
     IPAddress adresseIPPortail(192, 168, 23, 1);
     IPAddress passerellePortail(192, 168, 23, 1);
     IPAddress masqueReseauPortail(255, 255, 255, 0);
@@ -99,7 +58,7 @@ void Program::connexionReseau()
     this->m_wifiManager->setParamsPage(true);
 
     // Pour le débug, on peut forcer l'effacement de la configuration du WiFi
-    this->m_wifiManager->erase();
+    // this->m_wifiManager->erase();
 
     // Essaie de se connecter au réseau WiFi. Si échec, il lance le portail de
     // configuration. L'appel est bloquant -> rend la main après le timeout
@@ -117,4 +76,96 @@ void Program::connexionReseau()
     //     Serial.println("Connecté au réseau : " + WiFi.SSID() +
     //                    " avec l'adresse : " + WiFi.localIP().toString());
     // }
+}
+
+void callback(char *topic, byte *payload, unsigned int length)
+{
+    Serial.print("Message arrived [");
+    Serial.print(topic);
+    Serial.print("] ");
+    for (int i = 0; i < length; i++)
+    {
+        Serial.print((char)payload[i]);
+    }
+    Serial.println();
+}
+
+void reconnect()
+{
+    // Loop until we're reconnected
+    while (!client.connected())
+    {
+        Serial.print("Attempting MQTT connection...");
+        // Attempt to connect
+        if (client.connect(mqtt_server, brokerUser, brokerPassword))
+        {
+            Serial.println("connected");
+            // Once connected, publish an announcement...
+            client.publish("test/broker", "hello world");
+            // ... and resubscribe
+            client.subscribe("inTopic");
+        }
+        else
+        {
+            Serial.print("failed, rc=");
+            Serial.print(client.state());
+            Serial.println(" try again in 5 seconds");
+            // Wait 5 seconds before retrying
+            delay(5000);
+        }
+    }
+}
+
+Program::Program()
+{
+    Serial.begin(115200);
+
+    this->m_wifiManager = new WiFiManager();
+    // this->m_webServer = new WebServer();
+    // serveurWeb = new WebServer();
+    this->connexionReseau();
+    client.setCallback(callback);
+
+    // this->m_bme280 = new BME280();
+    client.setServer(mqtt_server, brokerPort);
+}
+
+void Program::loop()
+{
+    //  this->m_bme280->tick();
+    //  Serial.println(bme280->m_temperature);
+    //  Serial.println("test");
+
+    if (WiFi.isConnected())
+    {
+        // this->m_webServer->handleClient();
+    }
+
+    currentTime = millis();
+
+    if (!client.connected())
+    {
+        reconnect();
+    }
+
+    if (currentTime - lastTime > 5000 && client.connected())
+    {
+        Serial1.println("test");
+        lastTime = currentTime;
+        bool x = client.publish(brokerTopic, "Hello from ESP32");
+        if (x)
+        {
+            Serial.println("Message sent");
+        }
+        else
+        {
+            Serial.println("Message not sent");
+        }
+    }
+    else
+    {
+        Serial.println("not connected");
+    }
+
+    client.loop();
 }
