@@ -11,7 +11,8 @@ BME280::BME280()
     m_temperature = 0.0f;
     m_altitude = 0.0f;
     m_pression = 0.0f;
-    m_message = "";
+    m_message1 = "";
+    m_message2 = "";
 }
 
 void BME280::tick()
@@ -27,16 +28,24 @@ void BME280::tick()
     m_temperature = m_bme.readTemperature();
     m_altitude = m_bme.readAltitude(SEALEVELPRESSURE_HPA);
     m_pression = m_bme.readPressure();
-    if (m_temperature > 0)
+    if (m_temperature > 5)
     {
-        m_message = "Plus haut que le point de congelation";
+        m_message1 = "Trop Chaud!";
+        m_message2 = "Fermer Patinoire";
+    } 
+    else if (m_temperature > 0)
+    {
+        m_message1 = "Chaud!";
+        m_message2 = "Pat. a risque!";
     }
-    else if (m_temperature > -5)
+    else if (m_temperature > -7)
     {
-        m_message = "Temperature Ideal";
+        m_message1 = "Froid!";
+        m_message2 = "Temp. Ideal!";
     }
     else
     {
-        m_message = "Temperature Froide";
+        m_message1 = "Très Froid!";
+        m_message2 = "Ne pas resurf.!";
     }
 };

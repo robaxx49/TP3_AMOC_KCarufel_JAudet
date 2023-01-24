@@ -10,7 +10,8 @@ public:
     float m_temperature;
     float m_pression;
     float m_altitude;
-    String m_message;
+    String m_message1;
+    String m_message2;
     Adafruit_BME280 m_bme;
     BME280();
     void tick();
