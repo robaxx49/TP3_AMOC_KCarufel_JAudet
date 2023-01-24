@@ -16,40 +16,43 @@ uint16_t brokerPort = 1883;
 const char *brokerTopic = "test/broker";
 
 // WebServer *serveurWeb;
-WiFiClient espClient;
-PubSubClient client(espClient);
+WiFiClient wifiClient;
+PubSubClient client(wifiClient);
+
+WiFiManagerParameter paramerePersonnalise("identifiant_unique_champ",
+                                          "Nom du champ",
+                                          "ValeurQuiEtaitSauvegardee", 40);
+
 long currentTime = 0;
 long lastTime = 0;
 
 void Program::connexionReseau()
 {
     Serial1.println("Connexion au réseau WiFi en cours...");
+
     IPAddress adresseIPPortail(192, 168, 23, 1);
     IPAddress passerellePortail(192, 168, 23, 1);
     IPAddress masqueReseauPortail(255, 255, 255, 0);
-
-    WiFiManagerParameter paramerePersonnalise("identifiant_unique_champ",
-                                              "Nom du champ",
-                                              "ValeurQuiEtaitSauvegardee", 40);
 
     this->m_wifiManager->setDebugOutput(true); // Mettre à true si vous avez des problèmes
     this->m_wifiManager->setAPCallback([](WiFiManager *p_wiFiManager)
                                        { Serial.println("Connexion au réseau WiFi échouée, on lance le portail !"); });
     this->m_wifiManager->setConfigPortalTimeout(180);
 
-    // this->m_wifiManager->setSaveParamsCallback([&paramerePersonnalise]()
-    //                                            {
-    //                                                Serial.println(
-    //                                                    "Sauvegarde de la configuration effectuée par l'utilisateur dans le "
-    //                                                    "portail...");
-    //                                                Serial.println(String("Nouvelle valeur du paramètre : ") +
-    //                                                               paramerePersonnalise.getValue());
+    this->m_wifiManager->setSaveParamsCallback([&paramerePersonnalise]()
+                                               {
+                                                   Serial.println(
+                                                       "Sauvegarde de la configuration effectuée par l'utilisateur dans le "
+                                                       "portail...");
+                                                   Serial.println(String("Nouvelle valeur du paramètre : ") +
+                                                                  paramerePersonnalise.getValue());
+                                                                  
 
-    // Exemple d'actions...
-    // Sauvegarde des données en JSON
-    // Redémarrage : ESP.restart();
-    // etc.
-    //                                           });
+                                                   // Exemple d'actions...
+                                                   // Sauvegarde des données en JSON
+                                                   // Redémarrage : ESP.restart();
+                                                   // etc.
+                                               });
 
     this->m_wifiManager->addParameter(&paramerePersonnalise);
 
@@ -97,7 +100,7 @@ void reconnect()
     {
         Serial.print("Attempting MQTT connection...");
         // Attempt to connect
-        if (client.connect(mqtt_server, brokerUser, brokerPassword))
+        if (client.connect("Esp32Arduino"))
         {
             Serial.println("connected");
             // Once connected, publish an announcement...
@@ -119,15 +122,29 @@ void reconnect()
 Program::Program()
 {
     Serial.begin(115200);
-
-    this->m_wifiManager = new WiFiManager();
     // this->m_webServer = new WebServer();
     // serveurWeb = new WebServer();
+
+    // WiFi.begin(SSIDWifi, motPasseWifi);
+    // Serial.println("Connecting to Wi-Fi");
+
+    // while (WiFi.status() != WL_CONNECTED)
+    // {
+    //     delay(500);
+    //     Serial.print(".");
+    // }
+
+    // WiFi.setAutoReconnect(true);
+    // WiFi.persistent(true);
+
+    // Serial.println("Connected to Wi-Fi" + WiFi.SSID() + " with IP address: " + WiFi.localIP().toString());
+
+    this->m_wifiManager = new WiFiManager();
     this->connexionReseau();
-    client.setCallback(callback);
 
     // this->m_bme280 = new BME280();
     client.setServer(mqtt_server, brokerPort);
+    client.setCallback(callback);
 }
 
 void Program::loop()
@@ -138,34 +155,28 @@ void Program::loop()
 
     if (WiFi.isConnected())
     {
-        // this->m_webServer->handleClient();
-    }
+        Serial.println("Wifi connected");
 
-    currentTime = millis();
-
-    if (!client.connected())
-    {
-        reconnect();
-    }
-
-    if (currentTime - lastTime > 5000 && client.connected())
-    {
-        Serial1.println("test");
-        lastTime = currentTime;
-        bool x = client.publish(brokerTopic, "Hello from ESP32");
-        if (x)
+        if (!client.connected())
         {
-            Serial.println("Message sent");
+            reconnect();
         }
-        else
-        {
-            Serial.println("Message not sent");
-        }
-    }
-    else
-    {
-        Serial.println("not connected");
-    }
 
-    client.loop();
+        if (currentTime - lastTime > 5000 && client.connected())
+        {
+            lastTime = currentTime;
+            bool x = client.publish(brokerTopic, "Hello from ESP32");
+            if (x)
+            {
+                Serial.println("Message sent");
+            }
+            else
+            {
+                Serial.println("Message not sent");
+            }
+            currentTime = millis();
+        }
+
+        client.loop();
+    }
 }
