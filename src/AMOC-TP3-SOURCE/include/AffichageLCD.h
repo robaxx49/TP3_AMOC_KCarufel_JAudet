@@ -8,10 +8,10 @@ class AffichageLCD
 {
 private:
     long m_derniereDateChangement;
-    String m_nomEquipeLocal;
-    String m_nomEquipeVisiteur;
+    String m_message1;
+    String m_message2;
 
 public:
-    AffichageLCD(String p_nomEquipeLocal, String p_nomEquipeVisiteur);
-    void tick(String p_nomEquipeLocal, String p_nomEquipeVisiteur);
+    AffichageLCD(String p_message1, String p_message2);
+    void tick(String p_message1, String p_message2);
 };
