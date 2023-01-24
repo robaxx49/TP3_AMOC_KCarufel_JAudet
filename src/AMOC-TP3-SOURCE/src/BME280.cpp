@@ -14,7 +14,7 @@ BME280::BME280()
     m_message1 = "";
     m_message2 = "";
 }
-
+//https://www.otip.com/Why-OTIP/News/Planning-to-build-a-backyard-ice-rink-Skate-smooth
 void BME280::tick()
 {
     bool status;
@@ -33,12 +33,12 @@ void BME280::tick()
         m_message1 = "Trop Chaud!";
         m_message2 = "Fermer Patinoire";
     } 
-    else if (m_temperature > 0)
+    else if (m_temperature > -7)
     {
         m_message1 = "Chaud!";
         m_message2 = "Pat. a risque!";
     }
-    else if (m_temperature > -7)
+    else if (m_temperature > -20)
     {
         m_message1 = "Froid!";
         m_message2 = "Temp. Ideal!";
