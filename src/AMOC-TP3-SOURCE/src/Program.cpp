@@ -8,10 +8,12 @@
 #include "BME280.h"
 #include "configMQTT.h"
 #include "configReseau.h"
+#include "AffichageLCD.h"
 
 IPAddress adresseIPPortail(192, 168, 23, 1);
 IPAddress passerellePortail(192, 168, 23, 1);
 IPAddress masqueReseauPortail(255, 255, 255, 0);
+
 
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
@@ -45,20 +47,19 @@ Program::Program()
 
     client.setCallback(callback);
 
-    //this->m_bme280 = new BME280();
+    this->m_bme280 = new BME280();
+    this->m_affichageLCD = new AffichageLCD(m_bme280->m_message1,m_bme280->m_message2);
     client.setServer(mqtt_server, brokerPort);
 }
 
 void Program::loop()
 {
-    //this->m_bme280->tick();
-    //Serial.println(this->m_bme280->m_temperature);
-    //Serial.println("test");
-
-    // if (!client.connected())
-    // {
-    //     this->reconnect();
-    // }
+    this->m_bme280->tick();
+    this->m_affichageLCD->tick(m_bme280->m_message1,m_bme280->m_message2);
+    if (!client.connected())
+    {
+        this->reconnect();
+    }
 
     if (millis() >= time_now + period)
     {
@@ -73,7 +74,7 @@ void Program::loop()
             Serial.println("Message not sent");
         }
 
-        this->sendMQTTTemperatureDiscoveryMsg();
+        this->sendMQTTTemperatureDiscoveryMsg(m_bme280->m_temperature);
     }
 
     client.loop();
@@ -143,7 +144,7 @@ void Program::reconnect()
     }
 }
 
-void Program::sendMQTTTemperatureDiscoveryMsg(int temperature)
+void Program::sendMQTTTemperatureDiscoveryMsg(float temperature)
 {
     // This is the discovery topic for this specific sensor
     String discoveryTopic = "homeassistant/bme280/temperature";
@@ -159,7 +160,7 @@ void Program::sendMQTTTemperatureDiscoveryMsg(int temperature)
     // I'm sending a JSON object as the state of this MQTT device
     // so we'll need to unpack this JSON object to get a single value
     // for this specific sensor.
-    doc["temperature"] = 5;
+    doc["temperature"] = temperature;
 
     size_t n = serializeJson(doc, buffer);
 
