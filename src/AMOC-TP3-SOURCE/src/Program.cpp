@@ -53,7 +53,6 @@ void Program::loop()
 {
     //this->m_bme280->tick();
     //Serial.println(this->m_bme280->m_temperature);
-    //Serial.println("test");
 
     // if (!client.connected())
     // {
@@ -73,7 +72,7 @@ void Program::loop()
             Serial.println("Message not sent");
         }
 
-        this->sendMQTTTemperatureDiscoveryMsg();
+        this->sendMQTTTemperatureDiscoveryMsg(5);
     }
 
     client.loop();
@@ -143,7 +142,7 @@ void Program::reconnect()
     }
 }
 
-void Program::sendMQTTTemperatureDiscoveryMsg(int temperature)
+void Program::sendMQTTTemperatureDiscoveryMsg(float temperature)
 {
     // This is the discovery topic for this specific sensor
     String discoveryTopic = "homeassistant/bme280/temperature";
@@ -159,7 +158,7 @@ void Program::sendMQTTTemperatureDiscoveryMsg(int temperature)
     // I'm sending a JSON object as the state of this MQTT device
     // so we'll need to unpack this JSON object to get a single value
     // for this specific sensor.
-    doc["temperature"] = 5;
+    doc["temperature"] = temperature;
 
     size_t n = serializeJson(doc, buffer);
 

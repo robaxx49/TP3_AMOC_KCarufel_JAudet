@@ -17,5 +17,5 @@ private:
     AffichageLCD *m_affichageLCD;
     void connexionReseau();
     void reconnect();
-    void sendMQTTTemperatureDiscoveryMsg(int temperature);
+    void sendMQTTTemperatureDiscoveryMsg(float temperature);
 };
