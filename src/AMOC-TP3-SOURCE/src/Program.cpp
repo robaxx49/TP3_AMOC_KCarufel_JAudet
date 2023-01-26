@@ -8,10 +8,12 @@
 #include "BME280.h"
 #include "configMQTT.h"
 #include "configReseau.h"
+#include "AffichageLCD.h"
 
 IPAddress adresseIPPortail(192, 168, 23, 1);
 IPAddress passerellePortail(192, 168, 23, 1);
 IPAddress masqueReseauPortail(255, 255, 255, 0);
+
 
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
@@ -45,19 +47,19 @@ Program::Program()
 
     client.setCallback(callback);
 
-    //this->m_bme280 = new BME280();
+    this->m_bme280 = new BME280();
+    this->m_affichageLCD = new AffichageLCD(m_bme280->m_message1,m_bme280->m_message2);
     client.setServer(mqtt_server, brokerPort);
 }
 
 void Program::loop()
 {
-    //this->m_bme280->tick();
-    //Serial.println(this->m_bme280->m_temperature);
-
-    // if (!client.connected())
-    // {
-    //     this->reconnect();
-    // }
+    this->m_bme280->tick();
+    this->m_affichageLCD->tick(m_bme280->m_message1,m_bme280->m_message2);
+    if (!client.connected())
+    {
+        this->reconnect();
+    }
 
     if (millis() >= time_now + period)
     {
@@ -72,7 +74,11 @@ void Program::loop()
             Serial.println("Message not sent");
         }
 
-        this->sendMQTTTemperatureDiscoveryMsg(5);
+        this->sendMQTTTemperatureDiscoveryMsg(m_bme280->m_temperature);
+        this->sendMQTTHumiditeDiscoveryMsg(m_bme280->m_humidite);
+        this->sendMQTTPressionDiscoveryMsg(m_bme280->m_pression);
+        this->sendMQTTAltitudeDiscoveryMsg(m_bme280->m_altitude);
+
     }
 
     client.loop();
@@ -147,7 +153,7 @@ void Program::sendMQTTTemperatureDiscoveryMsg(float temperature)
     // This is the discovery topic for this specific sensor
     String discoveryTopic = "homeassistant/bme280/temperature";
 
-    DynamicJsonDocument doc(1024);
+    DynamicJsonDocument doc(256);
     char buffer[256];
 
     // doc["name"] = "ESP32_Temperature";
@@ -159,6 +165,85 @@ void Program::sendMQTTTemperatureDiscoveryMsg(float temperature)
     // so we'll need to unpack this JSON object to get a single value
     // for this specific sensor.
     doc["temperature"] = temperature;
+
+    size_t n = serializeJson(doc, buffer);
+
+    bool messageEnvoye = client.publish(discoveryTopic.c_str(), buffer, n);
+
+    if (messageEnvoye)
+    {
+        Serial.println("Message envoyé");
+    }
+    else
+    {
+        Serial.println("Message non envoyé");
+    }
+}
+void Program::sendMQTTHumiditeDiscoveryMsg(float humidity)
+{
+    // This is the discovery topic for this specific sensor
+    String discoveryTopic = "homeassistant/bme280/humidity";
+
+    DynamicJsonDocument doc(256);
+    char buffer[256];
+
+
+    doc["humidity"] = humidity;
+
+    size_t n = serializeJson(doc, buffer);
+
+    bool messageEnvoye = client.publish(discoveryTopic.c_str(), buffer, n);
+
+    if (messageEnvoye)
+    {
+        Serial.println("Message envoyé");
+    }
+    else
+    {
+        Serial.println("Message non envoyé");
+    }
+}
+void Program::sendMQTTPressionDiscoveryMsg(float pression)
+{
+    // This is the discovery topic for this specific sensor
+    String discoveryTopic = "homeassistant/bme280/pression";
+
+    DynamicJsonDocument doc(256);
+    char buffer[256];
+
+
+    doc["pression"] = pression;
+
+    size_t n = serializeJson(doc, buffer);
+
+    bool messageEnvoye = client.publish(discoveryTopic.c_str(), buffer, n);
+
+    if (messageEnvoye)
+    {
+        Serial.println("Message envoyé");
+    }
+    else
+    {
+        Serial.println("Message non envoyé");
+    }
+}
+void Program::sendMQTTAltitudeDiscoveryMsg(float altitude)
+{
+    // This is the discovery topic for this specific sensor
+    String discoveryTopic = "homeassistant/bme280/altitude";
+
+    DynamicJsonDocument doc(256);
+    char buffer[256];
+
+    // doc["name"] = "ESP32_Temperature";
+    // doc["state_topic"] = stateTopic;
+    // doc["unit_of_meas"] = "°C";
+    // doc["dev_cla"] = "temperature";
+    // doc["frc_upd"] = true;
+    // I'm sending a JSON object as the state of this MQTT device
+    // so we'll need to unpack this JSON object to get a single value
+    // for this specific sensor.
+    doc["altitude"] = altitude;
 
     size_t n = serializeJson(doc, buffer);
 
