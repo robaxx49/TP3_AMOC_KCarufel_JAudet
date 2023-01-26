@@ -1,5 +1,5 @@
-#define brokerUser "admin"
-#define brokerPassword "admin"
-#define mqtt_server "10.0.0.156"
+#define brokerUser "jon666x"
+#define brokerPassword "QWaszx123"
+#define mqtt_server "192.168.2.32"
 #define brokerPort 1883
 #define brokerTopic "test/broker"
