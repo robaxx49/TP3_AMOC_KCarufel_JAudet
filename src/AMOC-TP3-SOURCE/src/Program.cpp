@@ -188,7 +188,7 @@ void Program::sendMQTTHumiditeDiscoveryMsg(float humidite)
     char buffer[256];
 
 
-    doc["humidity"] = humidite;
+    doc["humidite"] = humidite;
 
     size_t n = serializeJson(doc, buffer);
 
