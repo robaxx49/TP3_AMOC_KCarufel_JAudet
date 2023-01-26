@@ -179,16 +179,16 @@ void Program::sendMQTTTemperatureDiscoveryMsg(float temperature)
         Serial.println("Message non envoyé");
     }
 }
-void Program::sendMQTTHumiditeDiscoveryMsg(float humidity)
+void Program::sendMQTTHumiditeDiscoveryMsg(float humidite)
 {
     // This is the discovery topic for this specific sensor
-    String discoveryTopic = "homeassistant/bme280/humidity";
+    String discoveryTopic = "homeassistant/bme280/humidite";
 
     DynamicJsonDocument doc(256);
     char buffer[256];
 
 
-    doc["humidity"] = humidity;
+    doc["humidity"] = humidite;
 
     size_t n = serializeJson(doc, buffer);
 

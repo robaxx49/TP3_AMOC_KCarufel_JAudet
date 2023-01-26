@@ -18,7 +18,7 @@ private:
     void connexionReseau();
     void reconnect();
     void sendMQTTTemperatureDiscoveryMsg(float temperature);
-    void sendMQTTHumiditeDiscoveryMsg(float temperature);
-    void sendMQTTPressionDiscoveryMsg(float temperature);
-    void sendMQTTAltitudeDiscoveryMsg(float temperature);
+    void sendMQTTHumiditeDiscoveryMsg(float humidite);
+    void sendMQTTPressionDiscoveryMsg(float pression);
+    void sendMQTTAltitudeDiscoveryMsg(float altitude);
 };
