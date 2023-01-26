@@ -1,6 +1,7 @@
 #include <WiFiManager.h>
 #include <uri/UriRegex.h>
 #include <PubSubClient.h>
+#include <ArduinoJson.h>
 
 #include "Program.h"
 #include "Arduino.h"
@@ -44,25 +45,24 @@ Program::Program()
 
     client.setCallback(callback);
 
-    this->m_bme280 = new BME280();
+    //this->m_bme280 = new BME280();
     client.setServer(mqtt_server, brokerPort);
 }
 
 void Program::loop()
 {
-    this->m_bme280->tick();
-    Serial.println(this->m_bme280->m_temperature);
-    Serial.println("test");
+    //this->m_bme280->tick();
+    //Serial.println(this->m_bme280->m_temperature);
+    //Serial.println("test");
 
-    if (!client.connected())
-    {
-        this->reconnect();
-    }
-    
+    // if (!client.connected())
+    // {
+    //     this->reconnect();
+    // }
+
     if (millis() >= time_now + period)
     {
         time_now += period;
-        Serial.println("test");
         bool x = client.publish(brokerTopic, "Hello from ESP32");
         if (x)
         {
@@ -72,6 +72,8 @@ void Program::loop()
         {
             Serial.println("Message not sent");
         }
+
+        this->sendMQTTTemperatureDiscoveryMsg();
     }
 
     client.loop();
@@ -110,7 +112,7 @@ void Program::connexionReseau()
     // Essaie de se connecter au réseau WiFi. Si échec, il lance le portail de
     // configuration. L'appel est bloquant -> rend la main après le timeout
 
-    this->m_wifiManager->erase();
+    // this->m_wifiManager->erase();
 
     this->m_wifiManager->autoConnect(SSIDPortail, motPasseAPPortail);
 }
@@ -141,3 +143,34 @@ void Program::reconnect()
     }
 }
 
+void Program::sendMQTTTemperatureDiscoveryMsg(int temperature)
+{
+    // This is the discovery topic for this specific sensor
+    String discoveryTopic = "homeassistant/bme280/temperature";
+
+    DynamicJsonDocument doc(1024);
+    char buffer[256];
+
+    // doc["name"] = "ESP32_Temperature";
+    // doc["state_topic"] = stateTopic;
+    // doc["unit_of_meas"] = "°C";
+    // doc["dev_cla"] = "temperature";
+    // doc["frc_upd"] = true;
+    // I'm sending a JSON object as the state of this MQTT device
+    // so we'll need to unpack this JSON object to get a single value
+    // for this specific sensor.
+    doc["temperature"] = 5;
+
+    size_t n = serializeJson(doc, buffer);
+
+    bool messageEnvoye = client.publish(discoveryTopic.c_str(), buffer, n);
+
+    if (messageEnvoye)
+    {
+        Serial.println("Message envoyé");
+    }
+    else
+    {
+        Serial.println("Message non envoyé");
+    }
+}
