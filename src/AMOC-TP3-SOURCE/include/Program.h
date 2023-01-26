@@ -16,4 +16,5 @@ private:
     BME280 *m_bme280;
     AffichageLCD *m_affichageLCD;
     void connexionReseau();
+    void reconnect();
 };
