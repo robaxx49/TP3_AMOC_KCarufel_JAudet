@@ -2,18 +2,11 @@
 #include <uri/UriRegex.h>
 #include <PubSubClient.h>
 
-// #include "BME280.h"
 #include "Program.h"
 #include "Arduino.h"
-
+#include "BME280.h"
+#include "configMQTT.h"
 #include "configReseau.h"
-
-const char *brokerUser = "admin";
-const char *brokerPassword = "admin";
-const char *mqtt_server = "10.0.0.156";
-// const char* brokerPort = 1883;
-uint16_t brokerPort = 1883;
-const char *brokerTopic = "test/broker";
 
 IPAddress adresseIPPortail(192, 168, 23, 1);
 IPAddress passerellePortail(192, 168, 23, 1);
@@ -51,22 +44,21 @@ Program::Program()
 
     client.setCallback(callback);
 
-    // this->m_bme280 = new BME280();
+    this->m_bme280 = new BME280();
     client.setServer(mqtt_server, brokerPort);
 }
 
 void Program::loop()
 {
-    //  this->m_bme280->tick();
-    //  Serial.println(bme280->m_temperature);
-    //  Serial.println("test");
+    this->m_bme280->tick();
+    Serial.println(this->m_bme280->m_temperature);
+    Serial.println("test");
 
     if (!client.connected())
     {
         this->reconnect();
     }
-    // && client.connected() && WiFi.isConnected()
-
+    
     if (millis() >= time_now + period)
     {
         time_now += period;
@@ -148,3 +140,4 @@ void Program::reconnect()
         }
     }
 }
+

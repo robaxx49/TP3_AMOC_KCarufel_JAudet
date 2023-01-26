@@ -1,9 +1,10 @@
 #include <Arduino.h>
-#include "BME280.h"
 #include <Wire.h>
 #include <Adafruit_BMP280.h>
 #include <Adafruit_BME280.h>
 #include <Adafruit_Sensor.h>
+
+#include "BME280.h"
 #include "Config.h"
 
 BME280::BME280()
