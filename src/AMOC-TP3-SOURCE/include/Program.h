@@ -3,6 +3,8 @@
 class WiFiManager;
 class BME280;
 class AffichageLCD;
+class DS18B20Sensor;
+class OneWire;
 class Program
 {
 public:
@@ -12,12 +14,14 @@ public:
 private:
     WiFiManager *m_wifiManager;
     BME280 *m_bme280;
+    OneWire *m_oneWire;
+    DS18B20Sensor *m_ds18b20;
     AffichageLCD *m_affichageLCD;
 
     void connexionReseau();
     void reconnect();
-    void sendMQTTTemperatureDiscoveryMsg(float temperature);
-    void sendMQTTHumiditeDiscoveryMsg(float temperature);
-    void sendMQTTPressionDiscoveryMsg(float temperature);
-    void sendMQTTAltitudeDiscoveryMsg(float temperature);
+    void sendMQTTTemperatureDiscoveryMsg();
+    void sendMQTTHumiditeDiscoveryMsg();
+    void sendMQTTPressionDiscoveryMsg();
+    void sendMQTTAltitudeDiscoveryMsg();
 };

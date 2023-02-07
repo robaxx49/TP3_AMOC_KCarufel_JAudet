@@ -13,8 +13,7 @@ BME280::BME280()
     m_altitude = 0.0f;
     m_pression = 0.0f;
     m_humidite = 0.0f;
-    m_message1 = "";
-    m_message2 = "";
+    
 }
 //https://www.otip.com/Why-OTIP/News/Planning-to-build-a-backyard-ice-rink-Skate-smooth
 void BME280::tick()
@@ -31,24 +30,5 @@ void BME280::tick()
     m_altitude = m_bme.readAltitude(SEALEVELPRESSURE_HPA);
     m_pression = m_bme.readPressure();
     m_humidite = m_bme.readHumidity();
-    if (m_temperature > 5)
-    {
-        m_message1 = "Trop Chaud!";
-        m_message2 = "Fermer Patinoire";
-    } 
-    else if (m_temperature > -7)
-    {
-        m_message1 = "Chaud!";
-        m_message2 = "Pat. a risque!";
-    }
-    else if (m_temperature > -20)
-    {
-        m_message1 = "Froid!";
-        m_message2 = "Temp. Ideal!";
-    }
-    else
-    {
-        m_message1 = "Très Froid!";
-        m_message2 = "Ne pas resurf.!";
-    }
+    
 };

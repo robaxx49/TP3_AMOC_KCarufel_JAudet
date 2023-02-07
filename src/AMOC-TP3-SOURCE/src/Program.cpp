@@ -6,14 +6,18 @@
 #include "Program.h"
 #include "Arduino.h"
 #include "BME280.h"
+#include "config.h"
 #include "configMQTT.h"
 #include "configReseau.h"
 #include "AffichageLCD.h"
+#include "DS18B20Sensor.h"
 
 IPAddress adresseIPPortail(192, 168, 23, 1);
 IPAddress passerellePortail(192, 168, 23, 1);
 IPAddress masqueReseauPortail(255, 255, 255, 0);
 
+int sensorNumber = 1;
+String stateTopic = "homeassistant/sensor//status";
 
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
@@ -24,7 +28,7 @@ WiFiManagerParameter paramerePersonnalise("identifiant_unique_champ",
 
 int period = 1000;
 unsigned long time_now = 0;
-
+const uint8_t PinSensorOneWire = 12;
 void callback(char *topic, byte *payload, unsigned int length)
 {
     Serial.print("Message arrived [");
@@ -47,15 +51,46 @@ Program::Program()
 
     client.setCallback(callback);
 
+    // this->m_bme280 = new BME280();
+    // this->m_affichageLCD = new AffichageLCD(m_bme280->m_message1,m_bme280->m_message2);
+    client.setServer(mqtt_server_cegep, brokerPort);
+
+    if (!client.connected())
+    {
+        this->reconnect();
+        this->sendMQTTTemperatureDiscoveryMsg();
+        this->sendMQTTHumidityDiscoveryMsg();
+    }
+}
+
+bool sendTemperatureMsg(float temperature)
+{
+    StaticJsonDocument<200> doc;
+    doc["temperature"] = temperature;
+    char buffer[200];
+    serializeJson(doc, buffer);
+    if (client.publish(stateTopic.c_str(), buffer))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
     this->m_bme280 = new BME280();
-    this->m_affichageLCD = new AffichageLCD(m_bme280->m_message1,m_bme280->m_message2);
+    this->m_ds18b20 = new DS18B20Sensor(&PinSensorOneWire,m_oneWire);
+    this->m_affichageLCD = new AffichageLCD(m_ds18b20->m_message1,m_ds18b20->m_message2);
     client.setServer(mqtt_server, brokerPort);
 }
 
 void Program::loop()
 {
+    // this->m_bme280->tick();
+    // this->m_affichageLCD->tick(m_bme280->m_message1,m_bme280->m_message2);
+
     this->m_bme280->tick();
-    this->m_affichageLCD->tick(m_bme280->m_message1,m_bme280->m_message2);
+    this->m_affichageLCD->tick(m_ds18b20->m_message1,m_ds18b20->m_message2);
+    this->m_ds18b20->tick(m_oneWire);
     if (!client.connected())
     {
         this->reconnect();
@@ -64,7 +99,7 @@ void Program::loop()
     if (millis() >= time_now + period)
     {
         time_now += period;
-        bool x = client.publish(brokerTopic, "Hello from ESP32");
+        bool x = sendTemperatureMsg(25.5);
         if (x)
         {
             Serial.println("Message sent");
@@ -73,12 +108,6 @@ void Program::loop()
         {
             Serial.println("Message not sent");
         }
-
-        this->sendMQTTTemperatureDiscoveryMsg(m_bme280->m_temperature);
-        this->sendMQTTHumiditeDiscoveryMsg(m_bme280->m_humidite);
-        this->sendMQTTPressionDiscoveryMsg(m_bme280->m_pression);
-        this->sendMQTTAltitudeDiscoveryMsg(m_bme280->m_altitude);
-
     }
 
     client.loop();
@@ -148,23 +177,23 @@ void Program::reconnect()
     }
 }
 
-void Program::sendMQTTTemperatureDiscoveryMsg(float temperature)
+void Program::sendMQTTTemperatureDiscoveryMsg()
 {
     // This is the discovery topic for this specific sensor
-    String discoveryTopic = "homeassistant/bme280/temperature";
+    String discoveryTopic = "homeassistant/sensor/ESP32_Temperature/config";
 
     DynamicJsonDocument doc(256);
     char buffer[256];
 
-    // doc["name"] = "ESP32_Temperature";
-    // doc["state_topic"] = stateTopic;
-    // doc["unit_of_meas"] = "°C";
-    // doc["dev_cla"] = "temperature";
-    // doc["frc_upd"] = true;
+    doc["name"] = "ESP32_Temperature";
+    doc["state_topic"] = stateTopic;
+    doc["unit_of_meas"] = "°C";
+    doc["dev_cla"] = "temperature";
+    doc["frc_upd"] = true;
     // I'm sending a JSON object as the state of this MQTT device
     // so we'll need to unpack this JSON object to get a single value
     // for this specific sensor.
-    doc["temperature"] = temperature;
+    doc["value_template"] = "{{ value_json.temperature|default(0) }}";
 
     size_t n = serializeJson(doc, buffer);
 
@@ -174,21 +203,24 @@ void Program::sendMQTTTemperatureDiscoveryMsg(float temperature)
     {
         Serial.println("Message envoyé");
     }
+
     else
     {
         Serial.println("Message non envoyé");
     }
 }
-void Program::sendMQTTHumiditeDiscoveryMsg(float humidity)
+
+void Program::sendMQTTHumiditeDiscoveryMsg()
 {
     // This is the discovery topic for this specific sensor
-    String discoveryTopic = "homeassistant/bme280/humidity";
+    String discoveryTopic = "homeassistant/bme280/humidite";
+        String discoveryTopic = "homeassistant/sensor/ESP32_Temperature/config";
+
 
     DynamicJsonDocument doc(256);
     char buffer[256];
 
-
-    doc["humidity"] = humidity;
+    // doc["humidite"] = humidite;
 
     size_t n = serializeJson(doc, buffer);
 
@@ -203,7 +235,8 @@ void Program::sendMQTTHumiditeDiscoveryMsg(float humidity)
         Serial.println("Message non envoyé");
     }
 }
-void Program::sendMQTTPressionDiscoveryMsg(float pression)
+
+void Program::sendMQTTPressionDiscoveryMsg()
 {
     // This is the discovery topic for this specific sensor
     String discoveryTopic = "homeassistant/bme280/pression";
@@ -211,8 +244,7 @@ void Program::sendMQTTPressionDiscoveryMsg(float pression)
     DynamicJsonDocument doc(256);
     char buffer[256];
 
-
-    doc["pression"] = pression;
+    // doc["pression"] = pression;
 
     size_t n = serializeJson(doc, buffer);
 
@@ -227,7 +259,8 @@ void Program::sendMQTTPressionDiscoveryMsg(float pression)
         Serial.println("Message non envoyé");
     }
 }
-void Program::sendMQTTAltitudeDiscoveryMsg(float altitude)
+
+void Program::sendMQTTAltitudeDiscoveryMsg()
 {
     // This is the discovery topic for this specific sensor
     String discoveryTopic = "homeassistant/bme280/altitude";
@@ -235,15 +268,15 @@ void Program::sendMQTTAltitudeDiscoveryMsg(float altitude)
     DynamicJsonDocument doc(256);
     char buffer[256];
 
-    // doc["name"] = "ESP32_Temperature";
-    // doc["state_topic"] = stateTopic;
-    // doc["unit_of_meas"] = "°C";
-    // doc["dev_cla"] = "temperature";
-    // doc["frc_upd"] = true;
+    doc["name"] = "ESP32_Temperature";
+    doc["state_topic"] = stateTopic;
+    doc["unit_of_meas"] = "°C";
+    doc["dev_cla"] = "temperature";
+    doc["frc_upd"] = true;
     // I'm sending a JSON object as the state of this MQTT device
     // so we'll need to unpack this JSON object to get a single value
     // for this specific sensor.
-    doc["altitude"] = altitude;
+    // doc["altitude"] = altitude;
 
     size_t n = serializeJson(doc, buffer);
 
