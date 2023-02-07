@@ -4,14 +4,15 @@
 #include "Config.h"
 #include "DS18B20Sensor.h"
 
-DS18B20Sensor::DS18B20Sensor(OneWire *oneWire)
+DS18B20Sensor::DS18B20Sensor(const uint8_t *sensorAddress , OneWire *oneWire)
+: m_sensorAddress(sensorAddress)
 {
     m_temperature = 0.0f;
     DallasTemperature *m_ds18b20 = new DallasTemperature(oneWire);
     m_ds18b20->begin();
     m_message1 = "";
     m_message2 = "";
-    
+    m_ds18b20->requestTemperaturesByAddress(m_sensorAddress);
 }
 
 void DS18B20Sensor::tick(OneWire *oneWire)

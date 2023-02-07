@@ -11,6 +11,7 @@ public:
     float m_temperature;
     String m_message1;
     String m_message2;
-    DS18B20Sensor(OneWire *oneWire);
+    const uint8_t *m_sensorAddress;
+    DS18B20Sensor(const uint8_t *sensorAddress, OneWire *oneWire);
     void tick(OneWire *oneWire);
 };
