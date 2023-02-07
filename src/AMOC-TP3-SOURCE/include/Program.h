@@ -17,8 +17,8 @@ private:
     AffichageLCD *m_affichageLCD;
     void connexionReseau();
     void reconnect();
-    void sendMQTTTemperatureDiscoveryMsg(float temperature);
-    void sendMQTTHumiditeDiscoveryMsg(float humidite);
-    void sendMQTTPressionDiscoveryMsg(float pression);
-    void sendMQTTAltitudeDiscoveryMsg(float altitude);
+    void sendMQTTTemperatureDiscoveryMsg();
+    void sendMQTTHumiditeDiscoveryMsg();
+    void sendMQTTPressionDiscoveryMsg();
+    void sendMQTTAltitudeDiscoveryMsg();
 };
