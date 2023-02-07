@@ -6,9 +6,11 @@
 #include "Program.h"
 #include "Arduino.h"
 #include "BME280.h"
+#include "config.h"
 #include "configMQTT.h"
 #include "configReseau.h"
 #include "AffichageLCD.h"
+#include "DS18B20Sensor.h"
 
 IPAddress adresseIPPortail(192, 168, 23, 1);
 IPAddress passerellePortail(192, 168, 23, 1);
@@ -26,7 +28,7 @@ WiFiManagerParameter paramerePersonnalise("identifiant_unique_champ",
 
 int period = 1000;
 unsigned long time_now = 0;
-
+const uint8_t PinSensorOneWire = 12;
 void callback(char *topic, byte *payload, unsigned int length)
 {
     Serial.print("Message arrived [");
@@ -75,6 +77,10 @@ bool sendTemperatureMsg(float temperature)
     {
         return false;
     }
+    this->m_bme280 = new BME280();
+    this->m_ds18b20 = new DS18B20Sensor(&PinSensorOneWire,m_oneWire);
+    this->m_affichageLCD = new AffichageLCD(m_ds18b20->m_message1,m_ds18b20->m_message2);
+    client.setServer(mqtt_server, brokerPort);
 }
 
 void Program::loop()
@@ -82,6 +88,9 @@ void Program::loop()
     // this->m_bme280->tick();
     // this->m_affichageLCD->tick(m_bme280->m_message1,m_bme280->m_message2);
 
+    this->m_bme280->tick();
+    this->m_affichageLCD->tick(m_ds18b20->m_message1,m_ds18b20->m_message2);
+    this->m_ds18b20->tick(m_oneWire);
     if (!client.connected())
     {
         this->reconnect();

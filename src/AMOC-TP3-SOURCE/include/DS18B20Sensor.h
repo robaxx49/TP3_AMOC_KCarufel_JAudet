@@ -9,6 +9,9 @@ private:
 DallasTemperature *m_ds18b20;
 public:
     float m_temperature;
-    DS18B20Sensor(OneWire *oneWire);
+    String m_message1;
+    String m_message2;
+    const uint8_t *m_sensorAddress;
+    DS18B20Sensor(const uint8_t *sensorAddress, OneWire *oneWire);
     void tick(OneWire *oneWire);
 };

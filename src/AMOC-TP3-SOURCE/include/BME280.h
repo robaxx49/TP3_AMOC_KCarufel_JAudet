@@ -12,8 +12,6 @@ public:
     float m_pression;
     float m_altitude;
     float m_humidite;
-    String m_message1;
-    String m_message2;
     Adafruit_BME280 m_bme;
     BME280();
     void tick();
