@@ -9,6 +9,7 @@
 #include "configMQTT.h"
 #include "configReseau.h"
 #include "AffichageLCD.h"
+#include "DS18B20Sensor.h"
 
 IPAddress adresseIPPortail(192, 168, 23, 1);
 IPAddress passerellePortail(192, 168, 23, 1);
@@ -48,14 +49,15 @@ Program::Program()
     client.setCallback(callback);
 
     this->m_bme280 = new BME280();
-    this->m_affichageLCD = new AffichageLCD(m_bme280->m_message1,m_bme280->m_message2);
+    this->m_ds18b20 = new DS18B20Sensor(m_oneWire);
+    this->m_affichageLCD = new AffichageLCD(m_ds18b20->m_message1,m_ds18b20->m_message2);
     client.setServer(mqtt_server, brokerPort);
 }
 
 void Program::loop()
 {
     this->m_bme280->tick();
-    this->m_affichageLCD->tick(m_bme280->m_message1,m_bme280->m_message2);
+    this->m_affichageLCD->tick(m_ds18b20->m_message1,m_ds18b20->m_message2);
     if (!client.connected())
     {
         this->reconnect();
