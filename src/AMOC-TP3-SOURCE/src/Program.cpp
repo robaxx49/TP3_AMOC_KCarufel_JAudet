@@ -23,7 +23,6 @@ String nomAppareil = "ESP32_Temperature_capteur";
 String modele = "ESP32";
 String fabricant = "Espressif";
 
-//OneWire oneWire(PinSensorOneWire);
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
 
@@ -33,7 +32,8 @@ WiFiManagerParameter paramerePersonnalise("identifiant_unique_champ",
 
 int period = 2000;
 unsigned long time_now = 0;
-const uint8_t PinSensorOneWire = 12;
+const uint8_t PinSensorOneWire = 14;
+OneWire oneWire(PinSensorOneWire);
 
 Program::Program()
 {
@@ -43,8 +43,10 @@ Program::Program()
 
     this->connexionReseau();
 
-    // this->m_bme280 = new BME280();
-    // this->m_affichageLCD = new AffichageLCD(m_bme280->m_message1,m_bme280->m_message2);
+    this->m_bme280 = new BME280();
+    this->m_ds18b20 = new DS18B20Sensor(&PinSensorOneWire,&oneWire);
+    this->m_affichageLCD = new AffichageLCD(this->m_ds18b20->m_message1,this->m_ds18b20->m_message2);
+    
 
     client.setServer(mqtt_server_cegep, brokerPort);
     client.setBufferSize(1024);
@@ -85,12 +87,9 @@ bool sendTemperatureMsg(float temperature, float humidity)
 
 void Program::loop()
 {
-    // this->m_bme280->tick();
-    // this->m_affichageLCD->tick(m_bme280->m_message1,m_bme280->m_message2);
-
-    // this->m_bme280->tick();
-    // this->m_affichageLCD->tick(m_ds18b20->m_message1,m_ds18b20->m_message2);
-    // this->m_ds18b20->tick(m_oneWire);
+    this->m_bme280->tick();
+    this->m_ds18b20->tick();
+    this->m_affichageLCD->tick(this->m_ds18b20->m_message1,this->m_ds18b20->m_message2);
 
     if (!client.connected())
     {
