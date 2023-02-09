@@ -23,6 +23,7 @@ String nomAppareil = "ESP32_Temperature_capteur";
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
 
+
 WiFiManagerParameter paramerePersonnalise("identifiant_unique_champ",
                                           "Nom du champ",
                                           "ValeurQuiEtaitSauvegardee", 40);
@@ -30,7 +31,7 @@ WiFiManagerParameter paramerePersonnalise("identifiant_unique_champ",
 int period = 1000;
 unsigned long time_now = 0;
 const uint8_t PinSensorOneWire = 12;
-
+OneWire oneWire(PinSensorOneWire);
 void mqttHomeAssistantDiscoverySetup()
 {
     // This is the discovery topic for this specific sensor
