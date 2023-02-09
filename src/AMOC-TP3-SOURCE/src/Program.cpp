@@ -11,6 +11,7 @@
 #include "configReseau.h"
 #include "AffichageLCD.h"
 #include "DS18B20Sensor.h"
+#include "CommunicationMQTT.h"
 
 IPAddress adresseIPPortail(192, 168, 23, 1);
 IPAddress passerellePortail(192, 168, 23, 1);
@@ -37,56 +38,57 @@ Program::Program()
     this->m_wifiManager = new WiFiManager();
 
     this->connexionReseau();
-
-    // this->m_bme280 = new BME280();
-    // this->m_affichageLCD = new AffichageLCD(m_bme280->m_message1,m_bme280->m_message2);
-
+    
+    this->m_bme280 = new BME280();
+    this->m_ds18b20 = new DS18B20Sensor(&PinSensorOneWire,&oneWire);
+    this->m_affichageLCD = new AffichageLCD(m_ds18b20->m_message1,m_ds18b20->m_message2);
     client.setServer(mqtt_server_cegep, brokerPort);
     client.setBufferSize(1024);
-
+    this->m_communicationMQTT = new CommunicationMQTT(&client);
     if (!client.connected())
     {
-        this->reconnect();
+         this->reconnect();
     }
 
     if(client.connected())
     {
-        this->sendMQTTTemperatureDiscoveryMsg();
-        this->sendMQTTHumiditeDiscoveryMsg();
+         this->m_communicationMQTT->sendMQTTTemperatureExtDiscoveryMsg();
+         this->m_communicationMQTT->sendMQTTTemperatureIntDiscoveryMsg();
+         this->m_communicationMQTT->sendMQTTHumiditeDiscoveryMsg();
     }
 }
 
 void Program::loop()
 {
-    // this->m_bme280->tick();
-    // this->m_affichageLCD->tick(m_bme280->m_message1,m_bme280->m_message2);
-
-    // this->m_bme280->tick();
-    // this->m_affichageLCD->tick(m_ds18b20->m_message1,m_ds18b20->m_message2);
-    // this->m_ds18b20->tick(m_oneWire);
+    this->m_bme280->tick();
+    this->m_affichageLCD->tick(m_ds18b20->m_message1,m_ds18b20->m_message2);
+    this->m_ds18b20->tick();
 
     if (!client.connected())
     {
         this->reconnect();
     }
 
-    // else
-    // {
-    //     if (millis() >= time_now + period)
-    //     {
-    //         time_now += period;
-    //         bool temp = sendTemperatureMsg(25.5, 50.3);
+    else
+    {
+         if (millis() >= time_now + period)
+        {
+            time_now += period;
+            //bool temp = sendTemperatureMsg(25.5, 50.3);
 
-    //         if (temp)
-    //         {
-    //             Serial.println("Message sent");
-    //         }
-    //         else
-    //         {
-    //             Serial.println("Message not sent");
-    //         }
-    //     }
-    // }
+            // if (temp)
+            // {
+            //     Serial.println("Message sent");
+            // }
+            // else
+            // {
+            //     Serial.println("Message not sent");
+            // }
+            this->m_communicationMQTT->sendTemperatureExtMsg(this->m_ds18b20->m_temperature);
+            this->m_communicationMQTT->sendTemperatureIntMsg(this->m_bme280->m_temperature);
+            this->m_communicationMQTT->sendHumiditeMsg(this->m_bme280->m_humidite);
+        }
+    }
 
     client.loop();
 }
@@ -154,5 +156,6 @@ void Program::reconnect()
         }
     }
 }
+
 
 

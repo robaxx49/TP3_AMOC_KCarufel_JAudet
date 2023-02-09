@@ -10,31 +10,31 @@ void CommunicationMQTT::loop()
 {
     this->m_client->loop();
 }
-
-void CommunicationMQTT::sendMQTTTemperatureDiscoveryMsg()
+void CommunicationMQTT::sendMQTTTemperatureExtDiscoveryMsg()
 {
-        // This is the discovery topic for this specific sensor
-    String discoveryTopicTemp = "homeassistant/sensor/ESP32_Temperature/config";
+    String discoveryTopicTemp = "homeassistant/sensor/sensor1/config";
 
     DynamicJsonDocument doc(1024);
     char strPayloadTemp[512];
     JsonObject device;
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Temperature
+    // Temperature Exterieur
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    doc["name"] = nomAppareil + "_temp";
-    doc["unique_id"] = "esp32-1_temp";
-    doc["state_topic"] = stateTopic;
-    doc["dev_cla"] = "temperature";
-    doc["unit_of_meas"] = "°C";
-    doc["frc_upd"] = true;
-    doc["value_template"] = "{{ value_json.temperature | default(0) }}";
 
-    device = doc.createNestedObject("device");
-    device["name"] = nomAppareil;
-    device["model"] = modele;
-    device["manufacturer"] = fabricant;
+    // doc["availability_topic"] = "homeassistant/sensor/ds18b20/status",
+    // device = doc.createNestedObject("device");
+    // device["identifiers"] = "a1c6f55e";
+    // device["name"] = nomAppareil;
+    // device["model"] = modele;
+    // device["manufacturer"] = fabricant;
+    // device["sw_version"] = "f76f4640798cf77257362636b100103d";
+    doc["platform"] = "mqtt";
+    doc["unique_id"] = "esp32-1_tempExt";
+    doc["name"] = nomAppareil + "_tempExt";
+    doc["state_topic"] = stateTopicExt;
+    doc["unit_of_meas"] = "°C";
+    doc["value_template"] = "{{ value_json.temperature | default(0) }}";
 
     serializeJsonPretty(doc, Serial);
     Serial.println(" ");
@@ -52,20 +52,147 @@ void CommunicationMQTT::sendMQTTTemperatureDiscoveryMsg()
         Serial.println("Message non envoyé : temperature");
     }
 }
-void CommunicationMQTT::sendTemperatureMsg(float p_temperatureInt,float p_temperatureExt)
+void CommunicationMQTT::sendMQTTTemperatureIntDiscoveryMsg()
 {
-    // This is the discovery topic for this specific sensor
-    String discoveryTopic = "homeassistant/sensor/temperature";
+    String discoveryTopicTemp = "homeassistant/sensor/sensor2/config";
+
+    DynamicJsonDocument doc(1024);
+    char strPayloadTemp[512];
+    JsonObject device;
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Temperature Interieur
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // doc["availability_topic"] = "homeassistant/sensor/ds18b20/status",
+    // device = doc.createNestedObject("device");
+    // device["identifiers"] = "a1c6f55e";
+    // device["name"] = nomAppareil;
+    // device["model"] = modele;
+    // device["manufacturer"] = fabricant;
+    // device["sw_version"] = "f76f4640798cf77257362636b100103d";
+    doc["platform"] = "mqtt";
+    doc["unique_id"] = "esp32-1_tempInt";
+    doc["name"] = nomAppareil + "_tempInt";
+    doc["state_topic"] = stateTopicInt;
+    doc["unit_of_meas"] = "°C";
+    doc["value_template"] = "{{ value_json.temperature | default(0) }}";
+
+    serializeJsonPretty(doc, Serial);
+    Serial.println(" ");
+    serializeJson(doc, strPayloadTemp);
+
+    bool messageEnvoyeTemp = m_client->publish(discoveryTopicTemp.c_str(), strPayloadTemp);
+
+    if (messageEnvoyeTemp)
+    {
+        Serial.println("Message envoyé : temperature");
+    }
+
+    else
+    {
+        Serial.println("Message non envoyé : temperature");
+    }
+}
+void CommunicationMQTT::sendMQTTHumiditeDiscoveryMsg()
+{
+    String discoveryTopicTemp = "homeassistant/sensor/sensor3/config";
+
+    DynamicJsonDocument doc(1024);
+    char strPayloadTemp[512];
+    JsonObject device;
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Humidite
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // doc["availability_topic"] = "homeassistant/sensor/ds18b20/status",
+    // device = doc.createNestedObject("device");
+    // device["identifiers"] = "a1c6f55e";
+    // device["name"] = nomAppareil;
+    // device["model"] = modele;
+    // device["manufacturer"] = fabricant;
+    // device["sw_version"] = "f76f4640798cf77257362636b100103d";
+    doc["platform"] = "mqtt";
+    doc["unique_id"] = "esp32-1_hum";
+    doc["name"] = nomAppareil + "_hum";
+    doc["state_topic"] = stateTopicHum;
+    doc["unit_of_meas"] = "%";
+    doc["value_template"] = "{{ value_json.humidite | default(0) }}";
+
+    serializeJsonPretty(doc, Serial);
+    Serial.println(" ");
+    serializeJson(doc, strPayloadTemp);
+
+    bool messageEnvoyeTemp = m_client->publish(discoveryTopicTemp.c_str(), strPayloadTemp);
+
+    if (messageEnvoyeTemp)
+    {
+        Serial.println("Message envoyé : temperature");
+    }
+
+    else
+    {
+        Serial.println("Message non envoyé : temperature");
+    }
+}
+void CommunicationMQTT::sendTemperatureExtMsg(float p_temperature)
+{
+
+    String Topic = stateTopicExt;
 
     DynamicJsonDocument doc(256);
     char buffer[256];
 
-    doc["temperatureInterieur"] = p_temperatureInt;
-    doc["temperatureExterieur"] = p_temperatureExt;
+    doc["temperature"] = p_temperature;
 
     size_t n = serializeJson(doc, buffer);
 
-    bool messageEnvoye = m_client->publish(discoveryTopic.c_str(), buffer, n);
+    bool messageEnvoye = m_client->publish(Topic.c_str(), buffer, n);
+
+    if (messageEnvoye)
+    {
+        Serial.println("Message envoyé");
+    }
+    else
+    {
+        Serial.println("Message non envoyé");
+    }
+}
+void CommunicationMQTT::sendTemperatureIntMsg(float p_temperature)
+{
+    String Topic = stateTopicInt;
+
+    DynamicJsonDocument doc(256);
+    char buffer[256];
+
+    doc["temperature"] = p_temperature;
+
+    size_t n = serializeJson(doc, buffer);
+
+    bool messageEnvoye = m_client->publish(Topic.c_str(), buffer, n);
+
+    if (messageEnvoye)
+    {
+        Serial.println("Message envoyé");
+    }
+    else
+    {
+        Serial.println("Message non envoyé");
+    }
+}
+void CommunicationMQTT::sendHumiditeMsg(float p_humidite)
+{
+    String Topic = stateTopicHum;
+
+    DynamicJsonDocument doc(256);
+    char buffer[256];
+
+    doc["humidite"] = p_humidite;
+
+    size_t n = serializeJson(doc, buffer);
+
+    bool messageEnvoye = m_client->publish(Topic.c_str(), buffer, n);
 
     if (messageEnvoye)
     {

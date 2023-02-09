@@ -5,6 +5,7 @@ class BME280;
 class AffichageLCD;
 class DS18B20Sensor;
 class OneWire;
+class CommunicationMQTT;
 class Program
 {
 public:
@@ -16,7 +17,7 @@ private:
     BME280 *m_bme280;
     DS18B20Sensor *m_ds18b20;
     AffichageLCD *m_affichageLCD;
-
+    CommunicationMQTT *m_communicationMQTT;
     void connexionReseau();
     void reconnect();
     void sendMQTTTemperatureDiscoveryMsg();

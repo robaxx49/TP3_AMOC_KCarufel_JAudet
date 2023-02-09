@@ -6,8 +6,12 @@ class CommunicationMQTT
 public:
     CommunicationMQTT(PubSubClient *client);
     void loop();
-    void sendMQTTTemperatureDiscoveryMsg();
-    void sendTemperatureMsg(float p_temperatureInt,float p_temperatureExt);
+    void sendMQTTTemperatureExtDiscoveryMsg();
+    void sendMQTTTemperatureIntDiscoveryMsg();
+    void sendMQTTHumiditeDiscoveryMsg();
+    void sendTemperatureExtMsg(float p_temperature);
+    void sendTemperatureIntMsg(float p_temperature);
+    void sendHumiditeMsg(float p_humidite);
 
 
 private:
