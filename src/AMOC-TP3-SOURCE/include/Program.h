@@ -14,7 +14,6 @@ public:
 private:
     WiFiManager *m_wifiManager;
     BME280 *m_bme280;
-    OneWire *m_oneWire;
     DS18B20Sensor *m_ds18b20;
     AffichageLCD *m_affichageLCD;
 

@@ -26,6 +26,7 @@ String fabricant = "Espressif";
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
 
+
 WiFiManagerParameter paramerePersonnalise("identifiant_unique_champ",
                                           "Nom du champ",
                                           "ValeurQuiEtaitSauvegardee", 40);
@@ -35,6 +36,8 @@ unsigned long time_now = 0;
 const uint8_t PinSensorOneWire = 12;
 
 void mqttHomeAssistantDiscoverySetupTemp()
+OneWire oneWire(PinSensorOneWire);
+void mqttHomeAssistantDiscoverySetup()
 {
     // This is the discovery topic for this specific sensor
 
