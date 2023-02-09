@@ -17,8 +17,11 @@ IPAddress passerellePortail(192, 168, 23, 1);
 IPAddress masqueReseauPortail(255, 255, 255, 0);
 
 int sensorNumber = 1;
-String stateTopic = "homeassistant/sensor/status";
+String stateTopic = "homeassistant/sensor/status/temp";
+String stateTopicHum = "homeassistant/sensor/status/humidity";
 String nomAppareil = "ESP32_Temperature_capteur";
+String modele = "ESP32";
+String fabricant = "Espressif";
 
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
@@ -27,53 +30,43 @@ WiFiManagerParameter paramerePersonnalise("identifiant_unique_champ",
                                           "Nom du champ",
                                           "ValeurQuiEtaitSauvegardee", 40);
 
-int period = 1000;
+int period = 2000;
 unsigned long time_now = 0;
 const uint8_t PinSensorOneWire = 12;
 
-void mqttHomeAssistantDiscoverySetup()
+void mqttHomeAssistantDiscoverySetupTemp()
 {
     // This is the discovery topic for this specific sensor
 
-    String discoveryTopic = "homeassistant/sensor/ESP32_Temperature/config";
-    DynamicJsonDocument doc(1024);
-    char strPayload[256];
-    JsonObject device;
-    JsonArray identifiers;
+    String discoveryTopicTemp = "homeassistant/sensor/ESP32_Temperature/config";
 
-    // String payload = "{\"name\":\"Temperature\",\"state_topic\":\"homeassistant/sensor/status\",\"unit_of_measurement\":\"°C\",\"value_template\":\"{{ value_json.temperature }}\",\"device\":{\"identifiers\":[\"esp32-1\"],\"name\":\"ESP32\",\"model\":\"ESP32\",\"manufacturer\":\"Espressif\"}}";
-    doc["name"] = "ESP32_Temperature";
-    doc["unique_id"] = "esp32-1_temperature";
+    DynamicJsonDocument doc(1024);
+    char strPayloadTemp[512];
+    JsonObject device;
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Temperature
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    doc["name"] = nomAppareil + "_temp";
+    doc["unique_id"] = "esp32-1_temp";
     doc["state_topic"] = stateTopic;
     doc["dev_cla"] = "temperature";
-    doc["unit_of_measurement"] = "°C";
+    doc["unit_of_meas"] = "°C";
     doc["frc_upd"] = true;
+    doc["value_template"] = "{{ value_json.temperature | default(0) }}";
 
-    //doc["value_template"] = "{{ value_json.temperature|default(0) }}";
-
-    // doc["name"] = "ESP32_Temperature";
-    // doc["state_topic"] = stateTopic;+
-    // doc["unit_of_meas"] = "°C";
-    // doc["dev_cla"] = "temperature";
-    // doc["frc_upd"] = true;
-    // // I'm sending a JSON object as the state of this MQTT device
-    // // so we'll need to unpack this JSON object to get a single value
-    // // for this specific sensor.
-    // doc["value_template"] = "{{ value_json.temperature|default(0) }}";
-
-    // device = doc.createNestedObject("device");
-    // device["name"] = "ESP32_Temperature_capteur";
-
-    // identifiers = device.createNestedArray("identifiers");
-    // identifiers.add("esp32-1");
+    device = doc.createNestedObject("device");
+    device["name"] = nomAppareil;
+    device["model"] = modele;
+    device["manufacturer"] = fabricant;
 
     serializeJsonPretty(doc, Serial);
     Serial.println(" ");
-    size_t n = serializeJson(doc, strPayload);
+    serializeJson(doc, strPayloadTemp);
 
-    bool messageEnvoye = client.publish(discoveryTopic.c_str(), strPayload);
+    bool messageEnvoyeTemp = client.publish(discoveryTopicTemp.c_str(), strPayloadTemp);
 
-    if (messageEnvoye)
+    if (messageEnvoyeTemp)
     {
         Serial.println("Message envoyé : temperature");
     }
@@ -81,6 +74,46 @@ void mqttHomeAssistantDiscoverySetup()
     else
     {
         Serial.println("Message non envoyé : temperature");
+    }  
+}
+
+void mqttHomeAssistantDiscoverySetupHum()
+{
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Humidity
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    DynamicJsonDocument doc(1024);
+    char strPayloadHum[512];
+    JsonObject device;
+
+    String discoveryTopicHum = "homeassistant/sensor/ESP32_Humidite/config";
+
+    doc["name"] = nomAppareil + "_hum";
+    doc["unique_id"] = "esp32-1_hum";
+    doc["state_topic"] = stateTopicHum;
+    doc["dev_cla"] = "humidite";
+    doc["unit_of_meas"] = "%";
+    doc["frc_upd"] = true;
+    doc["value_template"] = "{{ value_json.humidite | default(0) }}";
+
+    device = doc.createNestedObject("device");
+    device["name"] = nomAppareil;
+    device["model"] = modele;
+    device["manufacturer"] = fabricant;
+
+    serializeJsonPretty(doc, Serial);
+    Serial.println(" ");
+    serializeJson(doc, strPayloadHum);
+
+    bool messageEnvoyeHum = client.publish(discoveryTopicHum.c_str(), strPayloadHum);
+    if (messageEnvoyeHum)
+    {
+        Serial.println("Message envoyé : humidite");
+    }
+
+    else
+    {
+        Serial.println("Message non envoyé : humidite");
     }
 }
 
@@ -96,23 +129,27 @@ Program::Program()
     // this->m_affichageLCD = new AffichageLCD(m_bme280->m_message1,m_bme280->m_message2);
 
     client.setServer(mqtt_server_home, brokerPort);
+    client.setBufferSize(1024);
 
     if (!client.connected())
     {
         this->reconnect();
-        mqttHomeAssistantDiscoverySetup();
-        this->sendMQTTTemperatureDiscoveryMsg();
+        mqttHomeAssistantDiscoverySetupTemp();
+        mqttHomeAssistantDiscoverySetupHum();
+        // nthis->sendMQTTTemperatureDiscoveryMsg();
         // this->sendMQTTHumiditeDiscoveryMsg();
     }
 }
 
 bool sendTemperatureMsg(float temperature, float humidity)
 {
-    StaticJsonDocument<200> doc;
+    StaticJsonDocument<252> doc;
     doc["temperature"] = temperature;
     doc["humidite"] = humidity;
-    char buffer[200];
+    char buffer[252];
     serializeJson(doc, buffer);
+    serializeJsonPretty(doc, Serial);
+    Serial.println(" ");
     if (client.publish(stateTopic.c_str(), buffer))
     {
         return true;
@@ -124,6 +161,7 @@ bool sendTemperatureMsg(float temperature, float humidity)
     // this->m_bme280 = new BME280();
     // this->m_ds18b20 = new DS18B20Sensor(&PinSensorOneWire,m_oneWire);
     // this->m_affichageLCD = new AffichageLCD(m_ds18b20->m_message1,m_ds18b20->m_message2);
+
     client.setServer(mqtt_server_home, brokerPort);
 }
 
@@ -156,22 +194,23 @@ void Program::loop()
     {
         this->reconnect();
     }
+    // else
+    // {
+    //     if (millis() >= time_now + period)
+    //     {
+    //         time_now += period;
+    //         bool temp = sendTemperatureMsg(25.5, 50.3);
 
-    if (millis() >= time_now + period)
-    {
-        time_now += period;
-        // bool temp = sendTemperatureMsg(25.5, 50.3);
-        //  bool humid = sendHumidityMsg(50.5);
-
-        // if (temp)
-        // {
-        //     Serial.println("Message sent");
-        // }
-        // else
-        // {
-        //     Serial.println("Message not sent");
-        // }
-    }
+    //         if (temp)
+    //         {
+    //             Serial.println("Message sent");
+    //         }
+    //         else
+    //         {
+    //             Serial.println("Message not sent");
+    //         }
+    //     }
+    // }
 
     client.loop();
 }
