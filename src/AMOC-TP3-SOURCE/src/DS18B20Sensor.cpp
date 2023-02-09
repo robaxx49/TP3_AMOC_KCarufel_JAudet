@@ -7,18 +7,20 @@
 DS18B20Sensor::DS18B20Sensor(const uint8_t *sensorAddress , OneWire *oneWire)
 : m_sensorAddress(sensorAddress)
 {
-    m_temperature = 0.0f;
-    DallasTemperature *m_ds18b20 = new DallasTemperature(oneWire);
-    m_ds18b20->begin();
+    
+    DallasTemperature *ds18b20 = new DallasTemperature(oneWire);
+    ds18b20->begin();
     m_message1 = "";
     m_message2 = "";
-    m_ds18b20->requestTemperaturesByAddress(m_sensorAddress);
+    ds18b20->requestTemperaturesByAddress(this->m_sensorAddress);
+    m_temperature = ds18b20->getTempC(this->m_sensorAddress);
+    this->m_ds18b20 = ds18b20;
 }
 
-void DS18B20Sensor::tick(OneWire *oneWire)
+void DS18B20Sensor::tick()
 {
     this->m_ds18b20->requestTemperatures();
-    
+    m_temperature = m_ds18b20->getTempCByIndex(0);
     if (m_temperature > 5)
     {
         m_message1 = "Trop Chaud!";

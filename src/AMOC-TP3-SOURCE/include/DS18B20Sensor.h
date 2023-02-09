@@ -13,5 +13,5 @@ public:
     String m_message2;
     const uint8_t *m_sensorAddress;
     DS18B20Sensor(const uint8_t *sensorAddress, OneWire *oneWire);
-    void tick(OneWire *oneWire);
+    void tick();
 };
