@@ -6,6 +6,8 @@ class AffichageLCD;
 class DS18B20Sensor;
 class OneWire;
 class CommunicationMQTT;
+class Network;
+class BoutonReinitialisationData;
 class Program
 {
 public:
@@ -13,13 +15,13 @@ public:
     void loop();
 
 private:
-    WiFiManager *m_wifiManager;
+    
     BME280 *m_bme280;
     DS18B20Sensor *m_ds18b20;
     AffichageLCD *m_affichageLCD;
     CommunicationMQTT *m_communicationMQTT;
-    void connexionReseau();
-    void reconnect();
+    Network *m_network;
+    BoutonReinitialisationData *m_BoutonReset;
     void sendMQTTTemperatureDiscoveryMsg();
     void sendMQTTHumiditeDiscoveryMsg();
     void sendMQTTPressionDiscoveryMsg();
