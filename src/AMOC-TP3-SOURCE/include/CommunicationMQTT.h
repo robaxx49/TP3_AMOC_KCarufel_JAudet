@@ -1,10 +1,11 @@
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 
+class Network;
 class CommunicationMQTT
 {
 public:
-    CommunicationMQTT(PubSubClient *client);
+    CommunicationMQTT(PubSubClient *client, Network *p_network);
     void loop();
     void sendMQTTTemperatureExtDiscoveryMsg();
     void sendMQTTTemperatureIntDiscoveryMsg();
@@ -16,4 +17,5 @@ public:
 
 private:
     PubSubClient *m_client;
+    Network *m_network;
 };

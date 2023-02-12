@@ -2,10 +2,12 @@
 #include "configTransMQTT.h"
 #include "configMQTT.h"
 #include "GetDataFromJson.h"
+#include "Network.h"
 
-CommunicationMQTT::CommunicationMQTT(PubSubClient *client)
+CommunicationMQTT::CommunicationMQTT(PubSubClient *client,Network *p_network)
 {
     this->m_client = client;
+    this->m_network = p_network;
 }
 
 void CommunicationMQTT::loop()
@@ -155,7 +157,7 @@ void CommunicationMQTT::reconnect()
 {
     String id = "a1c6f55e1";
     String WillTopic = "homeassistant/sensor/ds18b20/status";
-
+    int count = 0;
     // Loop until we're reconnected
     while (!m_client->connected())
     {
@@ -169,14 +171,21 @@ void CommunicationMQTT::reconnect()
             m_client->publish("test/broker", "hello world");
             // ... and resubscribe
             m_client->subscribe("inTopic");
+            count = 0;
         }
         else
         {
+            if (count >=5)
+            {
+                m_network->resetWifiManager();
+            }
             Serial.print("failed, rc=");
             Serial.print(m_client->state());
             Serial.println(" try again in 5 seconds");
             // Wait 5 seconds before retrying
             delay(5000);
+            count++;
+            
         }
     }
 

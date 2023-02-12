@@ -37,10 +37,11 @@ Program::Program()
 
     client.setServer(GetDataFromJson::getDataOneFromJsonStringReturned("adresseIP").c_str(), brokerPort);
     client.setBufferSize(1024);
-    this->m_communicationMQTT = new CommunicationMQTT(&client);
+    this->m_communicationMQTT = new CommunicationMQTT(&client,m_network);
     if (!client.connected())
     { 
-         this->m_communicationMQTT->reconnect();
+        this->m_affichageLCD->tick("Connexion MQTT","voir manuel!");
+        this->m_communicationMQTT->reconnect();
     }
 
     if(client.connected())
@@ -61,8 +62,7 @@ void Program::loop()
     this->m_BoutonReset->tick();
     if (!client.connected())
     {
-        //m_network->resetWifiManager();
-        //m_network = new Network();    
+        this->m_affichageLCD->tick("Trouble MQTT","voir manuel!");    
         this->m_communicationMQTT->reconnect();
     }
 
