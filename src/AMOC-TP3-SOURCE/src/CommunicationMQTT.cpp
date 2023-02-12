@@ -27,7 +27,7 @@ void CommunicationMQTT::sendMQTTTemperatureExtDiscoveryMsg()
     doc["availability_topic"] = "homeassistant/sensor/ds18b20/status",
     device = doc.createNestedObject("device");
     device["identifiers"] = "a1c6f55e1";
-    device["name"] = nomAppareil;
+    device["name"] = nomAppareil+"_capteur_exterieur";
     device["model"] = modele;
     device["manufacturer"] = fabricant;
     device["sw_version"] = "f76f4640798cf77257362636b100103d";
@@ -41,6 +41,7 @@ void CommunicationMQTT::sendMQTTTemperatureExtDiscoveryMsg()
     Serial.println(" ");
     serializeJson(doc, strPayloadTemp);
 
+    m_client->publish(discoveryTopicTemp.c_str(), strPayloadTemp);
    
 }
 void CommunicationMQTT::sendMQTTTemperatureIntDiscoveryMsg()
@@ -58,7 +59,7 @@ void CommunicationMQTT::sendMQTTTemperatureIntDiscoveryMsg()
     doc["availability_topic"] = "homeassistant/sensor/ds18b20/status",
     device = doc.createNestedObject("device");
     device["identifiers"] = "a1c6f55e2";
-    device["name"] = nomAppareil;
+    device["name"] = nomAppareil+"_capteur_interieur_temperature";
     device["model"] = modele;
     device["manufacturer"] = fabricant;
     device["sw_version"] = "f76f4640798cf77257362636b100103d";
@@ -90,7 +91,7 @@ void CommunicationMQTT::sendMQTTHumiditeDiscoveryMsg()
     doc["availability_topic"] = "homeassistant/sensor/ds18b20/status",
     device = doc.createNestedObject("device");
     device["identifiers"] = "a1c6f55e3";
-    device["name"] = nomAppareil;
+    device["name"] = nomAppareil+"_capteur_interieur_humidite";
     device["model"] = modele;
     device["manufacturer"] = fabricant;
     device["sw_version"] = "f76f4640798cf77257362636b100103d";
