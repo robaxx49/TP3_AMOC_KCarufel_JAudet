@@ -7,5 +7,5 @@
 
 ## Lien de la vidéo de présentation
 
-- Lien YouTube #1 :https://youtu.be/j8npfIAbA44
-- Lien YouTube #2 (si applicable) :https://www.youtube.com/watch?v=K2ASLQLp93c
+- Lien YouTube #1 : https://youtu.be/j8npfIAbA44
+- Lien YouTube #2 (si applicable) : https://youtu.be/K2ASLQLp93c
