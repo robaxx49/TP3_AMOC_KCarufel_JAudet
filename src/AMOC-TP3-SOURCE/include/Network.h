@@ -6,7 +6,7 @@
 class WiFiManager;
 class Network
 {
-    public:
+public:
     Network();
     void resetWifiManager();
     WiFiManager *m_wifiManager;
