@@ -15,7 +15,6 @@ public:
     void loop();
 
 private:
-    
     BME280 *m_bme280;
     DS18B20Sensor *m_ds18b20;
     AffichageLCD *m_affichageLCD;
