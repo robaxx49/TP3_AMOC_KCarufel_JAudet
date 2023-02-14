@@ -6,7 +6,8 @@
 class DS18B20Sensor
 {
 private:
-DallasTemperature *m_ds18b20;
+    DallasTemperature *m_ds18b20;
+
 public:
     float m_temperature;
     String m_message1;

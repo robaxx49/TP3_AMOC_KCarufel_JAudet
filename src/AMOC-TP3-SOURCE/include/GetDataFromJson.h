@@ -6,6 +6,5 @@
 class GetDataFromJson
 {
 public:
-    
-    static String getDataOneFromJsonStringReturned(String p_valeurRechercher);
+        static String getDataOneFromJsonStringReturned(String p_valeurRechercher);
 };

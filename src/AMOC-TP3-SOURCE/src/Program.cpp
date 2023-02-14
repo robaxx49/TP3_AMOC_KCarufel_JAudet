@@ -30,46 +30,44 @@ Program::Program()
     Serial.begin(115200);
 
     this->m_network = new Network();
-    
+
     this->m_bme280 = new BME280();
-    this->m_ds18b20 = new DS18B20Sensor(&PinSensorOneWire,&oneWire);
-    this->m_affichageLCD = new AffichageLCD(m_ds18b20->m_message1,m_ds18b20->m_message2);
-    this->m_BoutonReset = new BoutonReinitialisationData(PinBouton,m_network);
+    this->m_ds18b20 = new DS18B20Sensor(&PinSensorOneWire, &oneWire);
+    this->m_affichageLCD = new AffichageLCD(m_ds18b20->m_message1, m_ds18b20->m_message2);
+    this->m_BoutonReset = new BoutonReinitialisationData(PinBouton, m_network);
 
     client.setServer(GetDataFromJson::getDataOneFromJsonStringReturned("adresseIP").c_str(), brokerPort);
     client.setBufferSize(1024);
-    this->m_communicationMQTT = new CommunicationMQTT(&client,m_network);
+    this->m_communicationMQTT = new CommunicationMQTT(&client, m_network);
     if (!client.connected())
-    { 
-        this->m_affichageLCD->tick("Connexion MQTT","voir manuel!");
+    {
+        this->m_affichageLCD->tick("Connexion MQTT", "voir manuel!");
         this->m_communicationMQTT->reconnect();
     }
 
-    if(client.connected())
+    if (client.connected())
     {
-         this->m_communicationMQTT->sendMQTTTemperatureExtDiscoveryMsg();
-         this->m_communicationMQTT->sendMQTTTemperatureIntDiscoveryMsg();
-         this->m_communicationMQTT->sendMQTTHumiditeDiscoveryMsg();
+        this->m_communicationMQTT->sendMQTTTemperatureExtDiscoveryMsg();
+        this->m_communicationMQTT->sendMQTTTemperatureIntDiscoveryMsg();
+        this->m_communicationMQTT->sendMQTTHumiditeDiscoveryMsg();
     }
 }
 
 void Program::loop()
 {
-    
-    
     this->m_bme280->tick();
-    this->m_affichageLCD->tick(m_ds18b20->m_message1,m_ds18b20->m_message2);
+    this->m_affichageLCD->tick(m_ds18b20->m_message1, m_ds18b20->m_message2);
     this->m_ds18b20->tick();
     this->m_BoutonReset->tick();
     if (!client.connected())
     {
-        this->m_affichageLCD->tick("Trouble MQTT","voir manuel!");    
+        this->m_affichageLCD->tick("Trouble MQTT", "voir manuel!");
         this->m_communicationMQTT->reconnect();
     }
 
     else
     {
-         if (millis() >= time_now + period)
+        if (millis() >= time_now + period)
         {
             time_now += period;
             this->m_communicationMQTT->sendTemperatureExtMsg(this->m_ds18b20->m_temperature);
@@ -80,10 +78,3 @@ void Program::loop()
 
     client.loop();
 }
-
-
-
-
-
-
-

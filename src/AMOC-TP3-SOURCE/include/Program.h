@@ -22,8 +22,4 @@ private:
     CommunicationMQTT *m_communicationMQTT;
     Network *m_network;
     BoutonReinitialisationData *m_BoutonReset;
-    void sendMQTTTemperatureDiscoveryMsg();
-    void sendMQTTHumiditeDiscoveryMsg();
-    void sendMQTTPressionDiscoveryMsg();
-    void sendMQTTAltitudeDiscoveryMsg();
 };
